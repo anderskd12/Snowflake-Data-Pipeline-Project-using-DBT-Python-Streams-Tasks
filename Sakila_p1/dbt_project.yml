@@ -37,3 +37,5 @@ models:
       +materialized: view
     surf_model:
       +materialized: table
+    employee_comp_processing:
+      +materialized: table

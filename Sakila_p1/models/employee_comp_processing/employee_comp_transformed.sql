@@ -1,0 +1,8 @@
+
+{{ config(materialized='table') }}
+
+SELECT CAST(YEAR AS CHAR(4)) AS YEAR, JOBFAMILY, JOB, CAST(EMPLOYEEIDENTIFIER AS VARCHAR()) AS EMPLOYEEIDENTIFIER, TOTALSALARY, TOTALCOMPENSATION
+FROM EMP_COMP_FULL WHERE  1 = 1 
+AND JOB IN ('IS Engineer-Senior', 'IS Business Analyst-Senior', 'IS Engineer-Senior')
+and yeartype = 'Calendar'
+--ORDER BY 4 DESC
