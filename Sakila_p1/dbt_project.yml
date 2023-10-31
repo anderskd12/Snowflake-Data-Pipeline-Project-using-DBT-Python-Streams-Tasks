@@ -33,9 +33,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   Sakila_p1:
     # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
     surf_model:
       +materialized: table
     employee_comp_processing:
+      +materialized: table
+    py_surfers:
       +materialized: table
