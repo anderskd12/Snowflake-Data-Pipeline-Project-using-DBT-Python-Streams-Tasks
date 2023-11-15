@@ -28,16 +28,22 @@ Setup Steps - Snowflake account added - DBT is setup and ran in Github codespace
 4.  Incremental data - See python worksheet in this repo for details on generating some random data.
  a.  This data adds data for two employee IDs that are already tracked and one new one.  Data added to df_sf.write.mode("append").save_as_table("EMPLOYEE_COMP_NEW_DATA") table
  b.  Setup this as a procedure and can setup as task to run regularly
+     CALL Add_Random_Emp_Data();
  c.  Setup Stream to track these changes   
+    Stream name:  stream KA_DB.K_ANALYTICS.STREAM_NEW_EMP_DATA
 
-5.  Track incremental changes and merge transformed large dataset with incremental data changes
- a.  Details:
- b.  Testing:
+6.  Track incremental changes and merge transformed large dataset with incremental data changes
+   For this - we create two tasks - one that runs the procedure to create new records (captured by stream)
+        The second tasks moves any new records that aren't already found in the 'FULL' table.
 
-6.  Combine with Marketplace data
+ a.  Details:  TASK task_create_new_employee_data
+              TASK:  task_load_new_employee_records
 
-7.  Create final materialized view - can do this in dbt
+ b.  Testing:  See Stream Script for details
 
-8.  Add in visualizations and data analysis - possibly using Streamlit?  Or Tableau?  Both?
+8.  Other ideas - Combine with Marketplace data
 
-9.  Other new ideas and uses?
+9.  Other ideas - Create final materialized view - can do this in dbt - with Marketplace data
+
+10.  Other ideas - Add in visualizations and data analysis - possibly using Streamlit?  Or Tableau?  Both?
+
