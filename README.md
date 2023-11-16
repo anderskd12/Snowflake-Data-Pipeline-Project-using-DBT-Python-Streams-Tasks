@@ -3,6 +3,9 @@ dbt and snowflake repo
 
 For this example of setting up a data pipeline in Snowflake using python and dbt.
 
+![image](https://github.com/anderskd12/dbt_snowflake_testing/assets/49698565/77d73a33-2ebb-439e-b77a-acf1d3311d9a)
+
+
 Overall 
 1.  Setup snowflake, python, dbt
 2.  Consume large dataset of San Fransisco employee compensation data (source:  https://catalog.data.gov/dataset/employee-compensation)
