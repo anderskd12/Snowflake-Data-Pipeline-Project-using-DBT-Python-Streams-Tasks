@@ -1,0 +1,83 @@
+C:\Windows\System32>snowsql -P
+Account: yjdbagf-yxb32436
+User: kadmin
+Password:
+* SnowSQL * v1.2.24
+Type SQL statements or !help
+kadmin#COMPUTE_WH@(no database).(no schema)>use KA_DB
+
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+1 Row(s) produced. Time Elapsed: 0.156s
+kadmin#COMPUTE_WH@KA_DB.PUBLIC>use schema K_ANALYTICS
+
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+1 Row(s) produced. Time Elapsed: 0.126s
+kadmin#COMPUTE_WH@KA_DB.K_ANALYTICS>use ROLE KA_ROLE
+
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+1 Row(s) produced. Time Elapsed: 0.091s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>use KA_DB
+
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+1 Row(s) produced. Time Elapsed: 0.100s
+kadmin#(no warehouse)@KA_DB.(no schema)>use schema K_ANALYTICS
+
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+1 Row(s) produced. Time Elapsed: 0.189s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>PUT file://C:\KellysRoot\2023_Setup_Kelly\Snowflake\Employee_Compensation.csv @
+                                        K_STAGE auto_compress=false;
++---------------------------+---------------------------+-------------+-------------+--------------------+--------------------+----------+---------+
+| source                    | target                    | source_size | target_size | source_compression | target_compression | status   | message |
+|---------------------------+---------------------------+-------------+-------------+--------------------+--------------------+----------+---------|
+| Employee_Compensation.csv | Employee_Compensation.csv |   203455841 |   203455856 | NONE               | NONE               | UPLOADED |         |
++---------------------------+---------------------------+-------------+-------------+--------------------+--------------------+----------+---------+
+1 Row(s) produced. Time Elapsed: 36.127s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>PUT file://C:\KellysRoot\2023_Setup_Kelly\Snowflake\EmpComp_Cut.csv @K_STAGE au
+                                        to_compress=false;
+253006 (n/a): File doesn't exist: ['C:\\KellysRoot\\2023_Setup_Kelly\\Snowflake\\EmpComp_Cut.csv']
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>PUT file://C:\KellysRoot\2023_Setup_Kelly\Snowflake\EmpComp_Cut.csv @K_STAGE au
+                                        to_compress=false;
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------+
+| source          | target          | source_size | target_size | source_compression | target_compression | status   | message |
+|-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------|
+| EmpComp_Cut.csv | EmpComp_Cut.csv |        2083 |        2096 | NONE               | NONE               | UPLOADED |         |
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------+
+1 Row(s) produced. Time Elapsed: 1.015s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>PUT file://C:\KellysRoot\2023_Setup_Kelly\Snowflake\EmpComp_Cut.csv @K_STAGE au
+                                        to_compress=false;
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+---------+---------+
+| source          | target          | source_size | target_size | source_compression | target_compression | status  | message |
+|-----------------+-----------------+-------------+-------------+--------------------+--------------------+---------+---------|
+| EmpComp_Cut.csv | EmpComp_Cut.csv |        2065 |           0 | NONE               | NONE               | SKIPPED |         |
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+---------+---------+
+1 Row(s) produced. Time Elapsed: 0.767s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>PUT file://C:\KellysRoot\2023_Setup_Kelly\Snowflake\EmpComp_Cut.csv @K_STAGE au
+                                        to_compress=false;
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------+
+| source          | target          | source_size | target_size | source_compression | target_compression | status   | message |
+|-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------|
+| EmpComp_Cut.csv | EmpComp_Cut.csv |        2065 |        2080 | NONE               | NONE               | UPLOADED |         |
++-----------------+-----------------+-------------+-------------+--------------------+--------------------+----------+---------+
+1 Row(s) produced. Time Elapsed: 0.930s
+kadmin#(no warehouse)@KA_DB.K_ANALYTICS>

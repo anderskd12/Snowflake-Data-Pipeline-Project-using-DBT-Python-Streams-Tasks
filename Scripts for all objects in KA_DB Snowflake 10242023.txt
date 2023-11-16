@@ -1,0 +1,333 @@
+Scripts for all objects I was working on 10/24:
+
+create or replace TABLE KA_DB.K_ANALYTICS.EMPCOMP (
+	ORGANIZATIONGROUPCODE NUMBER(38,0),
+	JOBFAMILYCODE NUMBER(38,0),
+	JOBCODE NUMBER(38,0),
+	YEARTYPE VARCHAR(16777216),
+	YEAR NUMBER(38,0),
+	ORGANIZATIONGROUP VARCHAR(16777216),
+	DEPARTMENTCODE VARCHAR(16777216),
+	DEPARTMENT VARCHAR(16777216),
+	UNIONCODE NUMBER(38,0),
+	UNIONID VARCHAR(16777216),
+	JOBFAMILY VARCHAR(16777216),
+	JOB VARCHAR(16777216),
+	EMPLOYEEIDENTIFIER NUMBER(38,0),
+	SALARIES NUMBER(38,0),
+	OVERTIME NUMBER(38,0),
+	OTHERSALARIES NUMBER(38,0),
+	TOTALSALARY NUMBER(38,0),
+	RETIREMENT NUMBER(38,0),
+	HEALTHANDDENTAL NUMBER(38,0),
+	OTHERBENEFITS NUMBER(38,0),
+	TOTALBENEFITS NUMBER(38,0),
+	TOTALCOMPENSATION NUMBER(38,0)
+);
+
+
+
+create or replace TABLE KA_DB.K_ANALYTICS.EMPLOYEE_COMP_NEW_DATA (
+	YEAR VARCHAR(4),
+	JOBFAMILY VARCHAR(16777216),
+	JOB VARCHAR(16777216),
+	EMPLOYEEIDENTIFIER VARCHAR(16777216),
+	TOTALSALARY NUMBER(38,0),
+	TOTALCOMPENSATION NUMBER(38,0),
+	DATETIME_ADDED TIMESTAMP_NTZ(9)
+);
+
+
+create or replace TRANSIENT TABLE KA_DB.K_ANALYTICS.EMPLOYEE_COMP_TRANSFORMED (
+	YEAR VARCHAR(4),
+	JOBFAMILY VARCHAR(16777216),
+	JOB VARCHAR(16777216),
+	EMPLOYEEIDENTIFIER VARCHAR(16777216),
+	TOTALSALARY NUMBER(38,0),
+	TOTALCOMPENSATION NUMBER(38,0)
+);
+
+
+create or replace TABLE KA_DB.K_ANALYTICS.EMP_COMP_FULL (
+	ORGANIZATIONGROUPCODE NUMBER(38,0),
+	JOBFAMILYCODE VARCHAR(16777216),
+	JOBCODE VARCHAR(16777216),
+	YEARTYPE VARCHAR(16777216),
+	YEAR NUMBER(38,0),
+	ORGANIZATIONGROUP VARCHAR(16777216),
+	DEPARTMENTCODE VARCHAR(16777216),
+	DEPARTMENT VARCHAR(16777216),
+	UNIONCODE NUMBER(38,0),
+	UNION_ID VARCHAR(16777216),
+	JOBFAMILY VARCHAR(16777216),
+	JOB VARCHAR(16777216),
+	EMPLOYEEIDENTIFIER NUMBER(38,0),
+	SALARIES NUMBER(38,0),
+	OVERTIME NUMBER(38,0),
+	OTHERSALARIES NUMBER(38,0),
+	TOTALSALARY NUMBER(38,0),
+	RETIREMENT NUMBER(38,0),
+	HEALTHANDDENTAL NUMBER(38,0),
+	OTHERBENEFITS NUMBER(38,0),
+	TOTALBENEFITS NUMBER(38,0),
+	TOTALCOMPENSATION NUMBER(38,0)
+);
+
+
+create or replace TRANSIENT TABLE KA_DB.K_ANALYTICS.KELLYS_SPOTS_MODEL (
+	SURFER_NAME VARCHAR(30),
+	HOME_COUNTRY VARCHAR(30),
+	STANCE VARCHAR(30),
+	SURF_SPOT VARCHAR(30),
+	SURF_SPOT_RATING NUMBER(38,0)
+);
+
+
+
+create or replace TRANSIENT TABLE KA_DB.K_ANALYTICS.KELLYS_TOP_SURF_SPOTS (
+	SURFER_NAME VARCHAR(30),
+	HOME_COUNTRY VARCHAR(30),
+	STANCE VARCHAR(30),
+	SURF_SPOT VARCHAR(30),
+	SURF_SPOT_RATING NUMBER(38,0)
+);
+
+create or replace TABLE KA_DB.K_ANALYTICS.K_TRACK_CHANGES_FROM_TASK (
+	MYFLAG VARCHAR(16777216),
+	SOMESTRING VARCHAR(16777216),
+	TIME_RAN TIMESTAMP_NTZ(9)
+);
+
+
+create or replace TRANSIENT TABLE KA_DB.K_ANALYTICS.MY_FIRST_DBT_MODEL (
+	ID NUMBER(1,0)
+);
+
+create or replace TABLE KA_DB.K_ANALYTICS.RANDOM_SALES (
+	CUSTOMER VARCHAR(16777216),
+	STORE_ID NUMBER(38,0),
+	PRODUCT VARCHAR(16777216),
+	AMOUNT NUMBER(38,0),
+	DATE_OF_PURCHASE DATE
+);
+
+
+create or replace TABLE KA_DB.K_ANALYTICS.SURFERS (
+	SURFER_NAME VARCHAR(30),
+	HOME_COUNTRY VARCHAR(30),
+	STANCE VARCHAR(30)
+);
+
+create or replace TABLE KA_DB.K_ANALYTICS.SURF_SPOTS_FAV (
+	SURFER_NAME VARCHAR(30),
+	SURF_SPOT VARCHAR(30),
+	SURF_SPOT_RATING NUMBER(38,0)
+);
+
+---views ----------------------------------------------------------------------------------------------------
+---views ----------------------------------------------------------------------------------------------------
+---views ----------------------------------------------------------------------------------------------------
+
+
+create or replace view KA_DB.K_ANALYTICS.MY_SECOND_DBT_MODEL(
+	ID
+) as (
+    -- Use the `ref` function to select from other models
+
+select *
+from KA_DB.K_ANALYTICS.my_first_dbt_model
+where id = 1
+  );
+
+
+
+create or replace view KA_DB.K_ANALYTICS.VSURFERS_AND_SPOTS(
+	SURFER_NAME,
+	SURF_SPOT,
+	SURF_SPOT_RATING,
+	HOME_COUNTRY,
+	STANCE
+) as 
+SELECT SP.SURFER_NAME, SURF_SPOT, SURF_SPOT_RATING, HOME_COUNTRY, STANCE FROM SURF_SPOTS_FAV AS SP JOIN SURFERS AS SF
+ ON SP.SURFER_NAME = SF.SURFER_NAME;
+
+
+--- CREATE K_STAGE ----------------------------------------------------------------------
+--- CREATE K_STAGE ----------------------------------------------------------------------
+--- CREATE K_STAGE ----------------------------------------------------------------------
+Add EmpComp_Raw file
+
+
+-- STREAM ----------------
+create or replace stream KA_DB.K_ANALYTICS.STREAM_VSURFERS_AND_SPOTS on view VSURFERS_AND_SPOTS;
+
+
+---- TASKS ----------------------------------------------------------------
+create or replace task KA_DB.K_ANALYTICS.WATCH_FOR_SPOTS_CHANGE_TASK
+	warehouse=KA_WH
+	when SYSTEM$STREAM_HAS_DATA('STREAM_VSURFERS_AND_SPOTS')
+	as CALL K_ANALYTICS.TRACK_FROM_TASKS();
+
+
+---Functions  -----------------------------------------------------------
+CREATE OR REPLACE FUNCTION KA_DB.K_ANALYTICS.ADD_KA("INPUT_STRING" VARCHAR(16777216))
+RETURNS VARIANT
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.8'
+HANDLER = 'add_ka.add_ka'
+IMPORTS = ('@KA_DB.K_ANALYTICS.K_STAGE/add_ka.py')
+;
+
+CREATE OR REPLACE FUNCTION KA_DB.K_ANALYTICS.ADD_KA("INPUT_STRING" VARIANT)
+RETURNS VARIANT
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.8'
+HANDLER = 'add_ka.add_ka'
+IMPORTS = ('@KA_DB.K_ANALYTICS.K_STAGE/add_ka.py')
+;
+
+
+--- PROCEDURES ------------------------------------------------------
+CREATE OR REPLACE PROCEDURE KA_DB.K_ANALYTICS.ADD_NEW_SURFERS()
+RETURNS TABLE ()
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.8'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'main'
+EXECUTE AS OWNER
+AS '# The Snowpark package is required for Python Worksheets. 
+# You can add more packages by selecting them using the Packages control and then importing them.
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark.functions import col
+import pandas as pd
+
+
+def main(session: snowpark.Session): 
+    # Your code goes here, inside the "main" handler.
+    tableName = ''information_schema.packages''
+    dataframe = session.table(tableName).filter(col("language") == ''python'')
+
+    ### Create snowflake data frame from SELECT statement #############################
+    dataframe_sf = session.sql("select * from SURFERS")
+    # Print a sample of the dataframe to standard output.
+    dataframe_sf.show()
+    #vs pandas --  dataframe.head(3)
+
+    ### for learning - setup PANDAS dataframe within the snowflake worksheet - added reference Import above
+    #data = {''SURFER_NAME'': [''Python_new'', ''Work'', ''Sheet''],
+    #       ''HOME_COUNTRY'': [''USA'', ''USA'', ''USA''],
+    #       ''STANCE'':[''goofy'',''goofy'',''goofy'']}
+    data = {''SURFER_NAME'': [''Python_new2'', ''KELLY A2'', ''Sheet''],
+           ''HOME_COUNTRY'': [''USA'', ''USA'', ''USA''],
+           ''STANCE'':[''GOOFY'',''GOOFY'',''GOOFY'']}
+    
+    df_pandas = pd.DataFrame(data)
+    
+    print("df_pandas dataframe type: " , type(df_pandas))
+    print("dataframe_sf dataframe type: " ,type(dataframe_sf))
+
+    ##### Show conversion to pandas  ############################## 
+    df_pandas2 = dataframe_sf.to_pandas()
+    print("df_pandas2 converted type: " ,type(df_pandas2))
+    print(df_pandas2.head(2))
+
+
+    #### Show conversion of pandas back to sf dataframe ###########################
+    dataframe_sf2 = session.create_dataframe(df_pandas)
+    print("dataframe_sf2 converted type: " ,type(dataframe_sf2))
+    # why a table instead of a dataframe?  -->  dataframe_sf2 converted type:  <class ''snowflake.snowpark.table.Table''>
+
+    ### JOIN / UNION ALL two sf dataframes together ################################
+    df_consolidated = dataframe_sf.union_all(dataframe_sf2)
+    print("consolidated rows: ")
+    df_consolidated.show()
+    #df_consolidated.write.mode("append").save_as_table("SURFERS")
+
+    print("dataframe_sf rows: ")
+    dataframe_sf.show()
+    print("dataframe_sf2 rows: ")
+    dataframe_sf2.show()
+    ### If we want ONLY new records ##############################################
+    df_new = dataframe_sf2.except_(dataframe_sf) 
+    print(''new rows dataframe: '')
+    df_new.show()
+    
+    ### Write dataframe to SURFERS table - now all values are in the table ---- 
+    df_new.write.mode("append").save_as_table("SURFERS")
+    
+    ''''''
+    #    df = session.create_dataframe([("short", 1), ("tall", 10)], schema=["category", "height"])
+        df = df.to_pandas()
+        #do data manipulation
+        #convert pandas dataframe to snowpark dataframe
+        dataframe = session.create_dataframe(df)
+        return dataframe 
+        
+    ''''''
+    print(df_pandas.head(5))
+
+    #df_lhs.join(df_rhs, df_lhs.col("key") == df_rhs.col("key")).select(df_lhs["key"].as_("key"), "value1", "value2").show()
+    
+    # Return value will appear in the Results tab.
+    return dataframe_sf
+
+''''''
+snow_df_spend = session.table(''campaign_spend'')
+snow_df_revenue = session.table(''monthly_revenue'')
+And here are some of the other ways to load data into Snowpark DataFrames.
+
+session.sql("select col1, col2... from tableName")
+session.read.options({"field_delimiter": ",", "skip_header": 1}).schema(user_schema).csv("@mystage/testCSV.csv")
+session.read.parquet("@stageName/path/to/file")
+session.create_dataframe([1,2,3], schema=["col1"])
+''''''';
+
+
+
+
+--- 
+CREATE OR REPLACE PROCEDURE KA_DB.K_ANALYTICS.KA_STRING()
+RETURNS VARCHAR(16777216)
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.8'
+PACKAGES = ('snowflake-snowpark-python','toml')
+HANDLER = 'add_ka.add_ka'
+IMPORTS = ('@KA_DB.K_ANALYTICS.K_STAGE/add_ka.py')
+EXECUTE AS CALLER
+;
+
+
+
+-- PROCs Continued --- 
+
+CREATE OR REPLACE PROCEDURE KA_DB.K_ANALYTICS.TRACK_FROM_TASKS()
+RETURNS VARCHAR(16777216)
+LANGUAGE SQL
+EXECUTE AS OWNER
+AS '
+    BEGIN 
+        INSERT INTO K_TRACK_CHANGES_FROM_TASK 
+        (SELECT METADATA$ACTION, SURFER_NAME || '' - '' || SURF_SPOT AS UPDATED_SURFERS_SPOTS, CURRENT_TIMESTAMP() FROM STREAM_VSURFERS_AND_SPOTS);
+        RETURN ''COMPLETED'';
+    END 
+  ';
+
+
+
+--- FROM STAGE ----- add_ka.py ---- 
+def add_ka(input_string):
+    modified_string = input_string + 'ka'
+    return modified_string
+
+
+
+
+
+
+
+
+
+
+
+
