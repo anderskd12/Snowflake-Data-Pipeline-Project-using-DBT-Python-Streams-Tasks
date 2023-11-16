@@ -1,0 +1,149 @@
+# The Snowpark package is required for Python Worksheets. 
+# You can add more packages by selecting them using the Packages control and then importing them.
+#  Kelly Note:  This eventually gets deployed as a procedure named 'Add_Random_Emp_Data'
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark.functions import col
+import pandas as pd
+import random
+from datetime import datetime
+
+def main(session: snowpark.Session): 
+    # Your code goes here, inside the "main" handler.
+    tableName = 'information_schema.packages'
+    dataframe = session.table(tableName).filter(col("language") == 'python')
+
+
+
+
+    # Define the lists for random data
+    employee_ids = ['44041', '43986', '1017', '1018', '1019']
+    year_choice = ['2014', '2015', '2016', '2017','2018','2019','2020','2021']
+    #year_choice = ['2020', '2021']
+    
+    # Create an empty DataFrame with the specified columns
+    #df = pd.DataFrame(columns=['name', 'storeid', 'product', 'amount', 'date'])
+    df = pd.DataFrame(columns=['year', 'jobfamily', 'job', 'employeeidentifier', 'totalsalary', 'totalcompensation'])
+    #YEAR	JOBFAMILY	JOB	EMPLOYEEIDENTIFIER	TOTALSALARY	TOTALCOMPENSATION
+    #2016	Information Systems	IS Engineer-Senior	44041	138,621	187,067
+
+    # Generate random data and add it to the DataFrame
+    for _ in range(50):  # You can change the number of rows as needed
+        year = random.choice(year_choice)
+        jobfamily = 'Information Systems'
+        job = 'IS Engineer-Senior'
+        employeeidentifier = random.choice(employee_ids)
+        totalsalary = random.randint(80000, 120000)
+        totalcompensation = random.randint(90000, 150000)
+        
+        # Get today's date
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        #timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = datetime.now().strftime('%dd-mon-yyyy hh:mi:ss')
+        
+        timestamp_dt = datetime.now()
+        print(timestamp)
+        print(type(timestamp_dt))
+        
+
+
+        
+        # Create a temporary DataFrame for the current row
+        row_data = pd.DataFrame([[year, jobfamily, job, employeeidentifier, totalsalary, totalcompensation, timestamp_dt]], columns=['year', 'jobfamily', 'job', 'employeeidentifier', 'totalsalary',  'totalcompensation', 'date_time_added'])
+
+        #dataDF["DATE_COL"] = dataDF["DATE_COL"].astype('datetime64')
+        #dataDF["DATE_COL"] = dataDF["DATE_COL"].dt.strftime('%Y-%m-%d') #Note full format can be strftime('%Y-%m-%dT%H:%M:%SZ')
+        row_data["date_time_added"] = row_data["date_time_added"].astype('datetime64')
+        row_data["date_time_added"] = row_data["date_time_added"].dt.strftime('%Y-%m-%d %H:%M:%S') #Note full format can be strftime('%Y-%m-%dT%H:%M:%SZ')
+        #row_data["date_time_added"] = row_data["date_time_added"].dt.strftime('%Y-%m-%d-%H-%M-%D') #Note full format can be strftime('%Y-%m-%dT%H:%M:%SZ')
+        #                                                                      2023-11-06 00:00:00.000
+        
+        
+        # Concatenate the temporary DataFrame with the main DataFrame
+        df = pd.concat([df, row_data], ignore_index=True)
+    
+    # Generate a date and timestamp for the filename
+    #timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    # Define the filename for the CSV file
+    csv_filename = f'data_{timestamp}.csv'
+    
+    # Save the final DataFrame to a CSV file
+    #df.to_csv(csv_filename, index=False)
+
+    # Display the DataFrame
+    #print(df)
+
+    print(f'Data saved to {csv_filename}')
+    
+    df_sf = session.create_dataframe(df)
+    
+    df_sf.write.mode("append").save_as_table("EMPLOYEE_COMP_NEW_DATA")
+    #df_sf_return_top2 = df_sf(2)
+    print(type(df_sf))
+    return df_sf
+
+'''    
+    ### Create snowflake data frame from SELECT statement #############################
+    dataframe_sf = session.sql("select * from SURFERS")
+    # Print a sample of the dataframe to standard output.
+    dataframe_sf.show()
+    #vs pandas --  dataframe.head(3)
+
+    ### for learning - setup PANDAS dataframe within the snowflake worksheet - added reference Import above
+    #data = {'SURFER_NAME': ['Python_new', 'Work', 'Sheet'],
+    #       'HOME_COUNTRY': ['USA', 'USA', 'USA'],
+    #       'STANCE':['goofy','goofy','goofy']}
+    data = {'SURFER_NAME': ['Python_new2', 'KELLY A2', 'Sheet'],
+           'HOME_COUNTRY': ['USA', 'USA', 'USA'],
+           'STANCE':['GOOFY','GOOFY','GOOFY']}
+    
+    df_pandas = pd.DataFrame(data)
+    
+    print("df_pandas dataframe type: " , type(df_pandas))
+    print("dataframe_sf dataframe type: " ,type(dataframe_sf))
+
+    ##### Show conversion to pandas  ############################## 
+    df_pandas2 = dataframe_sf.to_pandas()
+    print("df_pandas2 converted type: " ,type(df_pandas2))
+    print(df_pandas2.head(2))
+
+
+    #### Show conversion of pandas back to sf dataframe ###########################
+    dataframe_sf2 = session.create_dataframe(df_pandas)
+    print("dataframe_sf2 converted type: " ,type(dataframe_sf2))
+    # why a table instead of a dataframe?  -->  dataframe_sf2 converted type:  <class 'snowflake.snowpark.table.Table'>
+
+    ### JOIN / UNION ALL two sf dataframes together ################################
+    df_consolidated = dataframe_sf.union_all(dataframe_sf2)
+    print("consolidated rows: ")
+    df_consolidated.show()
+    #df_consolidated.write.mode("append").save_as_table("SURFERS")
+
+    print("dataframe_sf rows: ")
+    dataframe_sf.show()
+    print("dataframe_sf2 rows: ")
+    dataframe_sf2.show()
+    ### If we want ONLY new records ##############################################
+    df_new = dataframe_sf2.except_(dataframe_sf) 
+    print('new rows dataframe: ')
+    df_new.show()
+    
+    ### Write dataframe to SURFERS table - now all values are in the table ---- 
+    df_new.write.mode("append").save_as_table("SURFERS")
+
+
+    #    df = session.create_dataframe([("short", 1), ("tall", 10)], schema=["category", "height"])
+            df = df.to_pandas()
+            #do data manipulation
+            #convert pandas dataframe to snowpark dataframe
+            dataframe = session.create_dataframe(df)
+            return dataframe 
+            
+    print(df_pandas.head(5))
+
+    #df_lhs.join(df_rhs, df_lhs.col("key") == df_rhs.col("key")).select(df_lhs["key"].as_("key"), "value1", "value2").show()
+    
+    # Return value will appear in the Results tab.
+    return dataframe_sf
+'''
