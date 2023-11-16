@@ -1,4 +1,4 @@
-# dbt_snowflake_testing
+# Snowflake-Data-Pipeline-Project-using-DBT-Python-Streams-Tasks
 dbt and snowflake repo
 
 For this example of setting up a data pipeline in Snowflake using python and dbt.
