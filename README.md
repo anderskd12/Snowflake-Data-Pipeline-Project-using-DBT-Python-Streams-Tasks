@@ -14,7 +14,7 @@ Overall
 5.  Track and add new rows to the total dataset by adding in our incremental data - mimic a daily or streaming data feed
 6.  Combine data from a marketplace source to enhance our full set
 7.  Create a final materialized view that creates our final output that we would like to analyze
-8.  Add some visualization and metrics with our final dataset
+8.  Add some visualization and metrics with our final dataset.
 
 Setup Steps - Snowflake account added - DBT is setup and ran in Github codespaces
 1.  Snowflake information
