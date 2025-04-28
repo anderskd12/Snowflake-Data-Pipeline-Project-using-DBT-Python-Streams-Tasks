@@ -7,7 +7,7 @@ For this example of setting up a data pipeline in Snowflake using python and dbt
 
 
 Overall 
-1.  Setup snowflake, python, dbt
+1.  Setup snowflake, python, and dbt
 2.  Consume large dataset of San Fransisco employee compensation data (source:  https://catalog.data.gov/dataset/employee-compensation)
 3.  Create a materialized view that transforms the large raw dataset to the information that we want to use in this project
 4.  Add incremental data - this is created by using a Python worksheet in Snowflake and setting this up a procedure
